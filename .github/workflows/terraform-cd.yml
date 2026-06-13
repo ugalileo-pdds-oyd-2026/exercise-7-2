@@ -35,6 +35,8 @@ jobs:
 
   terraform-plan:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     defaults:
       run:
         working-directory: infra
