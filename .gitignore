@@ -1,0 +1,17 @@
+# Claude Code working directory — always exclude
+.claude/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfplan
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Note: .terraform.lock.hcl is intentionally NOT ignored
+# It must be committed so all collaborators use identical provider versions.
