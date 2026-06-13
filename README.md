@@ -125,7 +125,25 @@ Create a feature branch, add a comment to `main.tf`, push, and open a PR targeti
 - [ ] Both apply jobs succeed after approval
 
 **Evidence:**
-_[Evidence: pr-url.txt populated — to be added after Task 4]_
+
+```bash
+# Push repo to GitHub
+git remote add origin https://github.com/<YOUR_USERNAME>/oyd-exercise-7-2.git
+git push -u origin main
+
+# Create feature branch with a trivial change
+git checkout -b add-comment
+echo "# trivial comment" >> infra/main.tf
+git add infra/main.tf
+git commit -m "add comment to trigger PR checks"
+git push -u origin add-comment
+
+# Open PR on GitHub targeting main
+# Verify: three status checks appear independently
+# Verify: terraform-plan job posts plan comment
+# Merge PR, approve staging deployment
+# Paste the PR URL into evidence/pr-url.txt
+```
 
 ---
 

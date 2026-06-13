@@ -1,0 +1,13 @@
+# PR URL — Exercise 7.2
+
+Paste the pull request URL here after completing Task 4.
+
+Steps:
+1. Push this repo to GitHub as oyd-exercise-7-2
+2. Create a feature branch: git checkout -b add-comment
+3. Add a comment to infra/main.tf and push
+4. Open a PR targeting main on GitHub
+5. Confirm three status checks appear (terraform-fmt, terraform-validate, terraform-plan)
+6. Confirm terraform-plan posts a plan comment on the PR
+7. Replace this file content with the PR URL and push to main
+8. Submit the repository URL
