@@ -61,8 +61,13 @@ Navigate to **Settings → Environments** and create:
 **Teaching point:** The `environment:` key in a workflow job is a *reference* — GitHub looks up the named environment and enforces whatever protection rules are attached. If the environment doesn't exist yet, the job runs without any gate. Creating the environment first, before the workflow references it, teaches students to treat the gate as infrastructure that is provisioned separately from the pipeline that uses it.
 
 **Evidence:**
-<!-- Screenshot of GitHub → Settings → Environments showing both dev and staging configured -->
-_[Evidence: screenshot of both environments in GitHub — to be added after Task 1]_
+
+Go to **Settings → Environments → New environment**:
+
+1. Name: `dev` → click Configure environment → leave all protection rules off → Save
+2. Name: `staging` → click Configure environment → check **Required reviewers** → add yourself → Save
+
+Both environments must exist before Task 3's workflow is pushed, otherwise the `environment:` key in the apply jobs has no gate to enforce and the jobs run unprotected.
 
 ---
 
@@ -121,7 +126,12 @@ _[Evidence: pr-url.txt populated — to be added after Task 4]_
 
 ### Task 1 — GitHub Environments
 
-_[To be populated after Task 1]_
+Manual step performed in GitHub UI: Settings → Environments.
+
+- `dev` environment created with no protection rules.
+- `staging` environment created with Required reviewers enabled (reviewer: yourself).
+
+Both environments must exist before the workflow that references them is pushed to main.
 
 ### Task 2 — Three PR Status Checks
 
