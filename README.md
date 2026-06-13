@@ -86,8 +86,10 @@ Rewrite `terraform-cd.yml` to replace the single `terraform-ci` job with three i
 The PR comment step uses `actions/github-script@v7` to read `plan.txt` and post it as a comment. This closes the feedback loop: the reviewer sees the plan diff directly in the PR without leaving GitHub.
 
 **Evidence:**
-<!-- Screenshot or link showing three separate status checks on a PR -->
-_[Evidence: PR showing terraform-fmt, terraform-validate, terraform-plan as individual checks — to be added after Task 4]_
+
+After a PR is opened, GitHub will show three independent status checks, each named after its job. A failure in `terraform-fmt` will not block `terraform-validate` from running — they are fully independent. The `terraform-plan` job posts a Markdown-formatted comment with the full plan diff.
+
+See evidence/pr-url.txt for the PR where these checks are visible.
 
 ---
 
@@ -101,8 +103,13 @@ Add two jobs that are gated on `push: [main]` (not on pull_request):
 **Teaching point:** `apply-staging` does not re-plan — it applies the same binary artifact that was uploaded during the PR checks. The staging apply uses the staging tfvars but the *dev plan artifact*. In a real system each environment would have its own plan; here the point is that apply never re-plans — it always consumes a reviewed artifact. The `needs:` chain `apply-dev → apply-staging` creates a sequential promotion gate even without environment rules.
 
 **Evidence:**
-<!-- Link to the run showing apply-dev succeeded and apply-staging waited for approval -->
-_[Evidence: link to Actions run showing the promotion gate — to be added after Task 4]_
+
+After merging the PR:
+- `apply-dev` runs automatically (no gate on the `dev` environment).
+- `apply-staging` appears as **Waiting for approval** in the Actions run until a required reviewer approves.
+- The Actions run URL shows the sequential `apply-dev → apply-staging` chain with the approval pause visible.
+
+See evidence/pr-url.txt for the PR URL; the Actions run is linked from the same PR page.
 
 ---
 
@@ -135,12 +142,23 @@ Both environments must exist before the workflow that references them is pushed 
 
 ### Task 2 — Three PR Status Checks
 
-_[To be populated after Task 4 — screenshot or PR link showing three checks]_
+The rewritten `terraform-cd.yml` replaces the single `terraform-ci` job with three independent jobs:
+
+| Job | What it checks | Credentials? |
+|-----|----------------|--------------|
+| `terraform-fmt` | `fmt -check` — style only | No |
+| `terraform-validate` | `init -backend=false` + `validate` — logic only | No |
+| `terraform-plan` | Full init + plan + upload artifact + PR comment | Yes |
+
+See evidence/pr-url.txt — open that PR in GitHub to see all three checks listed under the Checks tab.
 
 ### Task 3 — Apply Jobs and Promotion Gate
 
-_[To be populated after Task 4 — Actions run link]_
+Two apply jobs added, both gated with `if: github.event_name == 'push'`:
+
+- `apply-dev` — needs all three PR jobs; environment `dev`; downloads `tfplan-dev` artifact; applies without re-planning
+- `apply-staging` — needs `apply-dev`; environment `staging`; the Required Reviewers rule on the staging environment causes GitHub to pause and show a "Review deployments" button before the job can start
 
 ### Task 4 — PR URL
 
-_[To be populated — see evidence/pr-url.txt]_
+See `evidence/pr-url.txt`.

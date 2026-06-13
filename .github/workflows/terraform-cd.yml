@@ -7,7 +7,33 @@ on:
     branches: [main]
 
 jobs:
-  terraform-ci:
+  # ── PR checks (all three run on pull_request) ──────────────────────────────
+
+  terraform-fmt:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - name: Terraform fmt
+        run: terraform fmt -check
+
+  terraform-validate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - name: Terraform init (no backend)
+        run: terraform init -backend=false
+      - name: Terraform validate
+        run: terraform validate
+
+  terraform-plan:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -16,9 +42,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
 
-      - name: Terraform fmt
-        run: terraform fmt -check
-
       - name: Terraform init
         run: terraform init -backend-config=envs/dev/backend-dev.hcl
         env:
@@ -26,12 +49,34 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION:            ${{ secrets.AWS_REGION }}
 
-      - name: Terraform validate
-        run: terraform validate
-
       - name: Terraform plan
         run: terraform plan -var-file=envs/dev/dev.tfvars -out=tfplan
         env:
           AWS_ACCESS_KEY_ID:     ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION:            ${{ secrets.AWS_REGION }}
+
+      - name: Save plan as text
+        run: terraform show -no-color tfplan > plan.txt
+
+      - name: Upload plan artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-dev
+          path: |
+            infra/tfplan
+            infra/plan.txt
+
+      - name: Post plan comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const plan = fs.readFileSync('infra/plan.txt', 'utf8');
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: '### Terraform Plan — dev\n```\n' + plan + '\n```'
+            });
